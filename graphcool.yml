@@ -1,0 +1,40 @@
+types: ./types.graphql
+functions:
+  facebookAuthentication:
+    handler:
+      code:
+        src: ./src/facebook/facebookAuthentication.ts
+    type: resolver
+    schema: ./src/facebook/facebookAuthentication.graphql
+  signup:
+    type: resolver
+    schema: src/email-password/signup.graphql
+    handler:
+      code: src/email-password/signup.ts
+
+  authenticate:
+    type: resolver
+    schema: src/email-password/authenticate.graphql
+    handler:
+      code: src/email-password/authenticate.ts
+
+  loggedInUser:
+    type: resolver
+    schema: src/email-password/loggedInUser.graphql
+    handler:
+      code: src/email-password/loggedInUser.ts
+
+permissions:
+- operation: File.read
+- operation: File.create
+- operation: File.update
+- operation: File.delete
+- operation: User.read
+- operation: User.create
+- operation: User.update
+- operation: User.delete
+
+rootTokens:
+- Facebook
+- Mock
+- facebook-login

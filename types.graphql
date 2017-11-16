@@ -1,0 +1,113 @@
+scalar JSON
+
+type File @model {
+  contentType: String!
+  createdAt: DateTime!
+  id: ID! @isUnique
+  name: String!
+  secret: String! @isUnique
+  size: Int!
+  updatedAt: DateTime!
+  url: String! @isUnique
+}
+
+type Location @model {
+  lat: Float
+  lng: Float
+  address: String
+  city: String
+  state: String
+  createdAt: DateTime!
+  id: ID! @isUnique
+  updatedAt: DateTime!
+}
+
+enum UserRole {
+  ADMIN
+  RESTAURANT_EMPLOYEE
+  RESTAURANT_MANAGER
+  NORMAL
+}
+
+enum VoucherStatus {
+  GENERATED # Garçom gerou o qrcode
+  CLAIMED # Usuário escaneou o qrcode
+  AVAILABLE # Usuário respondeu a pesquisa
+  EXCHANGED # Usuário trocou o voucher pelo Prize
+}
+
+enum QuestionType {
+  TEXT_INPUT
+  NUMBER_INPUT
+  SELECT
+  CHECKBOX
+}
+type User @model {
+  id: ID! @isUnique
+  email: String @isUnique
+  password: String
+  facebookUserId: String @isUnique
+  name: String
+  picture: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  employeeOfRestaurant: Restaurant @relation(name: "RestaurantEmployees")
+  managerOfRestaurant: Restaurant @relation(name: "RestaurantManagers")
+  generatedVouchers: [Voucher] @relation(name: "UserGeneratedVouchers")
+  obtainedVouchers: [Voucher] @relation(name: "UserObtainedVouchers")
+  answers: [Answer] @relation(name: "UserAnswers")
+  role: UserRole
+}
+
+type Restaurant @model {
+  id: ID! @isUnique
+  name: String
+  vouchers: [Voucher] @relation(name: "RestaurantVouchers")
+  employees: [User] @relation(name: "RestaurantEmployees")
+  managers: [User]  @relation(name: "RestaurantManagers")
+  surveys: [Survey]  @relation(name: "RestaurantSurveys")
+  prizes: [Prize] @relation(name: "RestaurantPrizes")
+}
+
+type Voucher @model {
+  id: ID! @isUnique
+  restaurant: Restaurant! @relation(name: "RestaurantVouchers")
+  generatedBy: User! @relation(name: "UserGeneratedVouchers")
+  obtainedBy: User! @relation(name: "UserObtainedVouchers")
+  obtainedAt: DateTime!
+  status: VoucherStatus
+  survey: Survey! @relation(name: "SurveyVouchers")
+  prize: Prize! @relation(name: "VoucherPrize")
+}
+
+type Survey @model {
+  id: ID! @isUnique
+  name: String!
+  vouchers: [Voucher] @relation(name: "SurveyVouchers")
+  questions: [Question!]! @relation(name: "SurveyQuestions")
+  restaurant: Restaurant! @relation(name: "RestaurantSurveys")
+}
+
+type Question @model {
+  id: ID! @isUnique
+  survey: Survey! @relation(name: "SurveyQuestions")
+  title: String!
+  type: QuestionType
+  config: String
+  answers: [Answer!] @relation(name: "QuestionAnswers")
+}
+
+type Answer @model {
+  id: ID! @isUnique
+  question: Question! @relation(name: "QuestionAnswers")
+  user: User! @relation(name: "UserAnswers")
+  value: String
+}
+
+type Prize @model {
+  id: ID! @isUnique
+  restaurant: Restaurant! @relation(name: "RestaurantPrizes")
+  name: String!
+  imageUrl: String!
+  vouchers: [Voucher] @relation(name: "VoucherPrize")
+}
